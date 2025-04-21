@@ -1,5 +1,7 @@
 package com.chanceman.filters;
 
+import com.chanceman.ChanceManConfig;
+
 import java.util.Set;
 
 /**
@@ -14,14 +16,20 @@ public class ItemsFilter {
      * or if it is an item set and item sets are disabled.
      *
      * @param itemId the item id
-     * @param enableFlatpacks true if flatpack items are allowed
-     * @param enableItemSets true if item set items are allowed
+     * @param config determines if item sets, flatpacks, and/or trade-only f2p items
+     *               should be blocked
      * @return true if the item is blocked; false otherwise
      */
-    public static boolean isBlocked(int itemId, boolean enableFlatpacks, boolean enableItemSets) {
-        return (!enableFlatpacks && Flatpacks.isFlatpack(itemId))
-                || (!enableItemSets && ItemSets.isItemSet(itemId))
-                || BlockedItems.getBLOCKED_ITEMS().contains(itemId);
+    public static boolean isBlocked(int itemId, ChanceManConfig config) {
+        return (!config.enableFlatpacks() && Flatpacks.isFlatpack(itemId))
+                || (!config.enableItemSets() && ItemSets.isItemSet(itemId))
+                || BlockedItems.getBLOCKED_ITEMS().contains(itemId)
+                || (config.freeToPlay() && isBlockedOnFreeToPlay(itemId, config));
+    }
+
+    private static boolean isBlockedOnFreeToPlay(int itemId, ChanceManConfig config) {
+        return !config.enableFreeToPlayTradeOnlyItems() &&
+                FreeToPlayTradeOnlyItems.isFreeToPlayTradeOnlyItem(itemId);
     }
 
     /**
